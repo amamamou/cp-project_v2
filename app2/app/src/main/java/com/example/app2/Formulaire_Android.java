@@ -1,6 +1,8 @@
 package com.example.app2;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.provider.CalendarContract;
 import android.view.View;
@@ -12,6 +14,8 @@ import android.widget.TimePicker;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 public class Formulaire_Android extends AppCompatActivity {
 
@@ -21,12 +25,14 @@ public class Formulaire_Android extends AppCompatActivity {
     TimePicker timePickerStart, timePickerEnd;
     Button addEvent;
 
+    private static final int REQUEST_CODE_WRITE_CALENDAR = 100;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_formulaire_android);
 
-        // Liaison des éléments UI
+        // Bind UI elements
         title = findViewById(R.id.etTitle);
         location = findViewById(R.id.etLocation);
         description = findViewById(R.id.etDescription);
@@ -38,10 +44,15 @@ public class Formulaire_Android extends AppCompatActivity {
         timePickerStart = findViewById(R.id.timePickerStart);
         timePickerEnd = findViewById(R.id.timePickerEnd);
 
+        // Check if permissions are granted at runtime
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_CALENDAR)
+                != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.WRITE_CALENDAR}, REQUEST_CODE_WRITE_CALENDAR);
+        }
 
         checkAllDay.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if (isChecked) {
-
                 linearStartTime.setVisibility(View.GONE);
                 linearEndTime.setVisibility(View.GONE);
             } else {
@@ -50,11 +61,12 @@ public class Formulaire_Android extends AppCompatActivity {
             }
         });
 
-
         addEvent.setOnClickListener(v -> {
+            // Ensure fields are not empty
             if (!title.getText().toString().isEmpty() && !location.getText().toString().isEmpty()
                     && !description.getText().toString().isEmpty()) {
 
+                // Create an Intent to add an event
                 Intent intent = new Intent(Intent.ACTION_INSERT);
                 intent.setData(CalendarContract.Events.CONTENT_URI);
                 intent.putExtra(CalendarContract.Events.TITLE, title.getText().toString());
@@ -62,49 +74,61 @@ public class Formulaire_Android extends AppCompatActivity {
                 intent.putExtra(CalendarContract.Events.EVENT_LOCATION, location.getText().toString());
 
                 String message = checkAllDay.isChecked()
-                        ? "Événement sur toute la journée ajouté !"
-                        : "Événement avec heures spécifiques ajouté !";
+                        ? "All-day event added!"
+                        : "Event with specific times added!";
 
                 if (!checkAllDay.isChecked()) {
-                    int startHour = timePickerStart.getHour();
-                    int startMinute = timePickerStart.getMinute();
-                    int endHour = timePickerEnd.getHour();
-                    int endMinute = timePickerEnd.getMinute();
+                    int startHour = timePickerStart.getCurrentHour(); // Use correct method
+                    int startMinute = timePickerStart.getCurrentMinute();
+                    int endHour = timePickerEnd.getCurrentHour(); // Use correct method
+                    int endMinute = timePickerEnd.getCurrentMinute();
 
                     long startTime = getTimeInMillis(startHour, startMinute);
                     long endTime = getTimeInMillis(endHour, endMinute);
 
-                    // Vérifier si l'heure de début est supérieure à l'heure de fin
+                    // Check if start time is before end time
                     if (startTime >= endTime) {
-                        Toast.makeText(Formulaire_Android.this, "L'heure de début ne peut pas être après l'heure de fin", Toast.LENGTH_LONG).show();
+                        Toast.makeText(Formulaire_Android.this, "Start time must be before end time", Toast.LENGTH_LONG).show();
                         return;
                     }
 
                     intent.putExtra(CalendarContract.EXTRA_EVENT_BEGIN_TIME, startTime);
                     intent.putExtra(CalendarContract.EXTRA_EVENT_END_TIME, endTime);
 
-                    message += "\nHeure de début : " + startHour + ":" + startMinute;
-                    message += "\nHeure de fin : " + endHour + ":" + endMinute;
+                    message += "\nStart Time: " + startHour + ":" + startMinute;
+                    message += "\nEnd Time: " + endHour + ":" + endMinute;
                 }
 
                 Toast.makeText(Formulaire_Android.this, message, Toast.LENGTH_LONG).show();
-
-                if (intent.resolveActivity(getPackageManager()) != null) {
-                    startActivity(intent);
-                }
+                startActivity(intent);
+                // Check if a calendar app is available to handle the intent
             } else {
-                Toast.makeText(Formulaire_Android.this, "Veuillez remplir tous les champs", Toast.LENGTH_LONG).show();
+                Toast.makeText(Formulaire_Android.this, "Please fill in all fields", Toast.LENGTH_LONG).show();
             }
         });
     }
 
+    // Helper function to convert time to milliseconds
     private long getTimeInMillis(int hour, int minute) {
-        // Créer un calendrier pour obtenir le timestamp
+        // Create a Calendar object to get the timestamp
         java.util.Calendar calendar = java.util.Calendar.getInstance();
         calendar.set(java.util.Calendar.HOUR_OF_DAY, hour);
         calendar.set(java.util.Calendar.MINUTE, minute);
         calendar.set(java.util.Calendar.SECOND, 0);
         calendar.set(java.util.Calendar.MILLISECOND, 0);
         return calendar.getTimeInMillis();
+    }
+
+    // Handle permission result (if needed)
+    @Override
+    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_CODE_WRITE_CALENDAR) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                Toast.makeText(this, "Permission granted!", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission denied!", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 }
