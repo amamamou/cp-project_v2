@@ -49,9 +49,9 @@ public class Formulaire1 extends AppCompatActivity implements View.OnClickListen
             if (resultUri != null) {
                 Log.d("fakhri", "Inserted successfully at URI: " + resultUri.toString());
             } else {
-                Log.d("fakhri", "Insert failed.");
+                Log.d("debug", "Insert failed.");
             }
-            Log.d("fakhri","hi");
+
         }else { finish();}
 
     }

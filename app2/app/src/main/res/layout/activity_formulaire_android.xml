@@ -79,7 +79,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
-            android:paddingVertical="8dp">
+            android:paddingVertical="1dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -112,7 +112,8 @@
             android:orientation="horizontal"
             android:visibility="gone"
             android:id="@+id/linearStartTime"
-            android:paddingVertical="8dp">
+            android:paddingVertical="1dp"
+            >
 
             <TextView
                 android:layout_width="wrap_content"
@@ -134,7 +135,7 @@
             android:orientation="horizontal"
             android:visibility="gone"
             android:id="@+id/linearEndTime"
-            android:paddingVertical="8dp">
+            android:paddingVertical="1dp">
 
             <TextView
                 android:layout_width="wrap_content"
@@ -155,7 +156,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Créer événement"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:paddingHorizontal="16dp"
             android:backgroundTint="#81C784" />
     </LinearLayout>

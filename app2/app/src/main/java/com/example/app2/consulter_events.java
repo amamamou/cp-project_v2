@@ -1,6 +1,5 @@
 package com.example.app2;
 
-import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,29 +14,25 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class consulter_events extends AppCompatActivity {
     public static final String AUTH = "com.example.app1";
-
-    // Base URI for the ContentProvider
     public static final Uri BASE = Uri.parse("content://" + AUTH);
-
-    // Path to the table (used for building URIs)
     public static final String PathTable = "table_Evenements";
-    public static final Uri contetn_uri = BASE.buildUpon().appendPath(PathTable).build();
-    public static final  Uri uri = Uri.parse("content://com.example.app1/table_Evenements");
+    public static final Uri uri = BASE.buildUpon().appendPath(PathTable).build();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_consulter_events);
 
         Button btnBack = findViewById(R.id.btn_back);
-        TableLayout tb=(TableLayout)findViewById(R.id.tbl_events);
+        TableLayout tb = findViewById(R.id.tbl_events);
         Cursor cursor = null;
+
         try {
             cursor = getContentResolver().query(uri, null, null, null, null);
             if (cursor != null && cursor.getCount() > 0) {
                 Log.d("fakhri", "Rows retrieved: " + cursor.getCount());
                 while (cursor.moveToNext()) {
-                    TableRow row=new TableRow(this);
-
+                    TableRow row = new TableRow(this);
                     String id = cursor.getString(0);
                     String titre = cursor.getString(1);
                     String lieu = cursor.getString(2);
@@ -91,11 +86,6 @@ public class consulter_events extends AppCompatActivity {
             }
         }
 
-
-
-
-
-
         btnBack.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -104,4 +94,3 @@ public class consulter_events extends AppCompatActivity {
         });
     }
 }
-
